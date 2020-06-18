@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <sys/time.h>
 #include <string.h>
+#include <time.h>
 
 #define CL_TARGET_OPENCL_VERSION 220
 
@@ -24,8 +24,6 @@
 #else
 #define checkErr(err) err
 #endif
-
-double time_to_delta(struct timespec start, struct timespec end);
 
 int main(int argc, char *argv[])
 {
@@ -157,13 +155,13 @@ int main(int argc, char *argv[])
     int block = 0;
     arguments[1] = work_unit_size;
 
-    struct timespec start_time, end_time;
+    clock_t start_time, end_time;
 
     cl_ulong found_seeds[MAX_SEED_BUFFER_SIZE];
     int total_seed_count = 0;
     double last_print = 0;
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &start_time);
+    start_time = clock();
     while (offset < end) {
         arguments[0] = block;
         checkErr(clEnqueueWriteBuffer(command_queue, data, CL_TRUE, 0, 10 * sizeof(int), arguments, 0, NULL, NULL));
@@ -174,7 +172,7 @@ int main(int argc, char *argv[])
         int seed_count = data_out[2];
         cl_ulong *result = malloc(sizeof(cl_ulong) * seed_count);
         checkErr(clEnqueueReadBuffer(command_queue, seeds, CL_TRUE, 0, sizeof(cl_ulong) * seed_count, result, 0, NULL, NULL));
-        clock_gettime(CLOCK_MONOTONIC_RAW, &end_time);
+        end_time = clock();
 
         for (int i = 0; i < seed_count; i++) {
             printf("    Found seed: %lu, %llu, height: %d\n",
@@ -185,7 +183,7 @@ int main(int argc, char *argv[])
             found_seeds[total_seed_count++] = result[i];
         }
 
-        double elapsed = time_to_delta(start_time, end_time);
+        double elapsed = (double)(end_time - start_time) / CLOCKS_PER_SEC;
         if (elapsed - last_print > PRINT_DELTA) {
             printf("Speed: %.2fm/s, %.2f%%, %.1fs\n",
                 (offset - start) / elapsed / 1000000,
@@ -203,7 +201,7 @@ int main(int argc, char *argv[])
     printf("Done\n");
     printf("Processed %lu seeds in %f seconds\n",
             end - start,
-            time_to_delta(start_time, end_time));
+            (double)(end_time - start_time) / CLOCKS_PER_SEC);
     printf("Found seeds: \n");
     for (int i = 0; i < total_seed_count; i++) {
         printf("    %lu\n", found_seeds[i]);
@@ -219,9 +217,4 @@ int main(int argc, char *argv[])
     checkErr(clReleaseContext(context));
     return 0;
 
-}
-
-double time_to_delta(struct timespec start, struct timespec end)
-{
-    return (double)((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000) / 1000000.0;
 }
