@@ -4,7 +4,7 @@ int nextIntUnknown(ulong* seed, short bound);
 unsigned char extract(const unsigned int heightMap[], int id);
 void increase(unsigned int heightMap[], int id, int val);
 
-#define WANTED_CACTUS_HEIGHT 18
+#define WANTED_CACTUS_HEIGHT 20
 #define FLOOR_LEVEL 63
 
 kernel void crack(global int *data, global ulong* answer)
