@@ -4,6 +4,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <time.h>
+#include <inttypes.h>
 
 #define CL_TARGET_OPENCL_VERSION 200
 
@@ -46,11 +47,11 @@ int main(int argc, char *argv[])
         if (strcmp(param, "-d") == 0 || strcmp(param, "--device") == 0) {
             gpuIndex = atoi(argv[i + 1]);
         } else if (strcmp(param, "-s") == 0 || strcmp(param, "--start") == 0) {
-            sscanf(argv[i + 1], "%llu", &start);
+            sscanf(argv[i + 1], "%" SCNd64, &start);
         } else if (strcmp(param, "-e") == 0 || strcmp(param, "--end") == 0) {
-            sscanf(argv[i + 1], "%llu", &end);
+            sscanf(argv[i + 1], "%" SCNd64, &end);
         } else if (strcmp(param, "-cs") == 0 || strcmp(param, "--chunkseed") == 0) {
-            sscanf(argv[i + 1], "%llu", &chunkSeed);
+            sscanf(argv[i + 1], "%" SCNd64, &chunkSeed);
             chunkSeedBottom4Bits = (int)(chunkSeed & 15U);
             chunkSeedBit5 = (int)((chunkSeed >> 4U) & 1U);
         } else if (strcmp(param, "-n1") == 0 || strcmp(param, "--neighbor1") == 0) {
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Received work unit: %llu\n", chunkSeed);
+    printf("Received work unit: %" SCNd64 "\n", chunkSeed);
     printf("Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d\n",
         neighbor1,
         neighbor2,
