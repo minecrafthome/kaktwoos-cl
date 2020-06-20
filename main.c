@@ -20,6 +20,7 @@
 #define KERNEL_BUFFER_SIZE (0x4000)
 #define MAX_SEED_BUFFER_SIZE (0x10000)
 #define PRINT_DELTA (3.0)
+#define _WIN64 1
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     int cactusHeight = 0;
 
     char *strend;
+    size_t seedbuffer_size;
 
     if (argc % 2 != 1) {
         printf("Failed to parse arguments\n");
@@ -114,8 +116,10 @@ int main(int argc, char *argv[])
     cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_ids[0], NULL, &err);
     check(err, "clCreateCommandQueueWithProperties ");
 
+    seedbuffer_size = 0x40 * sizeof(cl_ulong);
+
     // 16 Kb of memory for seeds
-    cl_mem seeds = clCreateBuffer(context, CL_MEM_READ_WRITE, 0x40 * sizeof(unsigned long), NULL, &err);
+    cl_mem seeds = clCreateBuffer(context, CL_MEM_READ_WRITE, seedbuffer_size , NULL, &err);
     check(err, "clCreateBuffer (seeds) ");
     cl_mem data =  clCreateBuffer(context, CL_MEM_READ_ONLY, 10 * sizeof(int), NULL, &err);
     check(err, "clCreateBuffer (data) ");
@@ -166,16 +170,21 @@ int main(int argc, char *argv[])
         int *data_out = malloc(sizeof(int) * 10);
         check(clEnqueueReadBuffer(command_queue, data, CL_TRUE, 0, sizeof(int) * 10, data_out, 0, NULL, NULL), "clEnqueueReadBuffer (data) ");
         int seed_count = data_out[2];
-        cl_ulong *result = malloc(sizeof(cl_ulong) * seed_count);
-        check(clEnqueueReadBuffer(command_queue, seeds, CL_TRUE, 0, sizeof(cl_ulong) * seed_count, result, 0, NULL, NULL), "clEnqueueReadBuffer (seeds) ");
-        end_time = clock();
 
-        for (int i = 0; i < seed_count; i++) {
-            printf("    Found seed: %lu, %llu, height: %d\n",
+// Errors HERE
+        //seed_count = 1;
+        seedbuffer_size = sizeof(cl_ulong) + sizeof(cl_ulong) * seed_count;
+        cl_ulong *result = malloc(sizeof(cl_ulong) + sizeof(cl_ulong) * seed_count);
+	check(clEnqueueReadBuffer(command_queue, seeds, CL_TRUE, 0, seedbuffer_size, result, 0, NULL, NULL), "clEnqueueReadBuffer2 (seeds) ");
+
+	end_time = clock();
+
+          for (int i = 0; i < seed_count; i++) {
+            printf("    Found seed: %"SCNd64 ", %llu, height: %d\n",
                     result[i],
                     result[i] & ((1ULL << 48ULL) - 1ULL),
                     (int)(result[i] >> 58ULL));
-            fprintf(stderr, "%lu\n", (cl_ulong)result[i]);
+            fprintf(stderr, "%"SCNd64 "\n", (cl_ulong)result[i]);
             found_seeds[total_seed_count++] = result[i];
         }
 
@@ -194,13 +203,13 @@ int main(int argc, char *argv[])
         free(data_out);
     }
 
-    printf("Done\n");
-    printf("Processed %lu seeds in %f seconds\n",
+  printf("Done\n");
+    printf("Processed %"SCNd64 " seeds in %f seconds\n",
             end - start,
             (double)(end_time - start_time) / CLOCKS_PER_SEC);
     printf("Found seeds: \n");
     for (int i = 0; i < total_seed_count; i++) {
-        printf("    %lu\n", found_seeds[i]);
+        printf("    %"SCNd64 "\n", found_seeds[i]);
     }
 
     check(clFlush(command_queue), "clFlush ");
