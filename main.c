@@ -19,8 +19,6 @@
 
 #define KERNEL_BUFFER_SIZE (0x4000)
 #define MAX_SEED_BUFFER_SIZE (0x10000)
-#define PRINT_DELTA (3.0)
-#define _WIN64 1
 
 int main(int argc, char *argv[])
 {
@@ -171,11 +169,9 @@ int main(int argc, char *argv[])
         check(clEnqueueReadBuffer(command_queue, data, CL_TRUE, 0, sizeof(int) * 10, data_out, 0, NULL, NULL), "clEnqueueReadBuffer (data) ");
         int seed_count = data_out[2];
 
-// Errors HERE
-        //seed_count = 1;
         seedbuffer_size = sizeof(cl_ulong) + sizeof(cl_ulong) * seed_count;
         cl_ulong *result = malloc(sizeof(cl_ulong) + sizeof(cl_ulong) * seed_count);
-	check(clEnqueueReadBuffer(command_queue, seeds, CL_TRUE, 0, seedbuffer_size, result, 0, NULL, NULL), "clEnqueueReadBuffer2 (seeds) ");
+	check(clEnqueueReadBuffer(command_queue, seeds, CL_TRUE, 0, seedbuffer_size, result, 0, NULL, NULL), "clEnqueueReadBuffer (seeds) ");
 
 	end_time = clock();
 
@@ -189,19 +185,15 @@ int main(int argc, char *argv[])
         }
 
         double elapsed = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-        if (elapsed - last_print > PRINT_DELTA) {
-            printf("Speed: %.2fm/s, %.2f%%, %.1fs\n",
-                (offset - start) / elapsed / 1000000,
-                (double)(offset - start) / (end - start) * 100,
-                elapsed);
-            last_print = elapsed;
-        }
-
         offset += work_unit_size;
         block++;
         free(result);
         free(data_out);
     }
+
+     double elapsed = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+     printf("Speed: %.2fm/s \n", (offset - start) / elapsed / 1000000);
+      last_print = elapsed;
 
   printf("Done\n");
     printf("Processed %"SCNd64 " seeds in %f seconds\n",
