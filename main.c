@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Received work unit: %" SCNd64 "\n", chunkSeed);
-    printf("Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d\n",
+    fprintf(stderr,"Received work unit: %" SCNd64 "\n", chunkSeed);
+    fprintf(stderr,"Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d\n",
         neighbor1,
         neighbor2,
         neighbor3,
@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     cl_uint num_devices;
     cl_uint num_platforms;
     cl_int err;
+
     check(clGetPlatformIDs(1, &platform_id, &num_platforms), "clGetPlatformIDs ");
     check(clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 1, device_ids, &num_devices), "clGetDeviceIDs ");
 
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
 
     size_t work_unit_size = 1048576;
     size_t block_size = 256;
+
     cl_ulong offset = start;
     int block = 0;
     arguments[1] = work_unit_size;
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
 
     start_time = clock();
     while (offset < end) {
-        arguments[0] = block;
+        arguments[0] =  block + start / work_unit_size;
         check(clEnqueueWriteBuffer(command_queue, data, CL_TRUE, 0, 10 * sizeof(int), arguments, 0, NULL, NULL), "clEnqueueWriteBuffer ");
         check(clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &work_unit_size, &block_size, 0, NULL, NULL), "clEnqueueNDRangeKernel ");
 
@@ -176,7 +178,7 @@ int main(int argc, char *argv[])
 	end_time = clock();
 
           for (int i = 0; i < seed_count; i++) {
-            printf("    Found seed: %"SCNd64 ", %llu, height: %d\n",
+            fprintf(stderr,"    Found seed: %"SCNd64 ", %llu, height: %d\n",
                     result[i],
                     result[i] & ((1ULL << 48ULL) - 1ULL),
                     (int)(result[i] >> 58ULL));
@@ -192,17 +194,16 @@ int main(int argc, char *argv[])
     }
 
      double elapsed = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-     printf("Speed: %.2fm/s \n", (offset - start) / elapsed / 1000000);
+     fprintf(stderr,"Speed: %.2fm/s \n", (offset - start) / elapsed / 1000000);
       last_print = elapsed;
 
-  printf("Done\n");
-	fprintf(stderr, "Done\n");
-    printf("Processed %"SCNd64 " seeds in %f seconds\n",
+    fprintf(stderr, "Done\n");
+    fprintf(stderr,"Processed %"SCNd64 " seeds in %f seconds\n",
             end - start,
             (double)(end_time - start_time) / CLOCKS_PER_SEC);
-    printf("Found seeds: \n");
+    fprintf(stderr,"Found seeds: \n");
     for (int i = 0; i < total_seed_count; i++) {
-        printf("    %"SCNd64 "\n", found_seeds[i]);
+        fprintf(stderr,"    %"SCNd64 "\n", found_seeds[i]);
     }
 
     check(clFlush(command_queue), "clFlush ");
