@@ -196,6 +196,7 @@ int main(int argc, char *argv[])
       last_print = elapsed;
 
   printf("Done\n");
+	fprintf(stderr, "Done\n");
     printf("Processed %"SCNd64 " seeds in %f seconds\n",
             end - start,
             (double)(end_time - start_time) / CLOCKS_PER_SEC);
