@@ -1,4 +1,4 @@
-![build-opencl](https://github.com/minecrafthome/kaktwoos-cl/workflows/build-opencl/badge.svg?event=check_run)
+![build-opencl](https://github.com/minecrafthome/kaktwoos-cl/workflows/build-opencl/badge.svg)
 
 # Kaktwoos OpenCL
 
