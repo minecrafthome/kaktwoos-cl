@@ -132,14 +132,14 @@ int main(int argc, char *argv[])
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    err = clBuildProgram(program, 1, device_ids, NULL, NULL, NULL);
+    err = clBuildProgram(program, 1, device_ids + gpuIndex, NULL, NULL, NULL);
 
     if (err != CL_SUCCESS) {
         size_t len;
-        clGetProgramBuildInfo(program, device_ids[0], CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+        clGetProgramBuildInfo(program, device_ids[gpuIndex], CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
 
         char *info = malloc(len);
-        clGetProgramBuildInfo(program, device_ids[0], CL_PROGRAM_BUILD_LOG, len, info, NULL);
+        clGetProgramBuildInfo(program, device_ids[gpuIndex], CL_PROGRAM_BUILD_LOG, len, info, NULL);
         printf("%s\n", info);
         free(info);
     }
