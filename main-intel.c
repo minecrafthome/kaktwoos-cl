@@ -136,9 +136,9 @@ boinc_init_options(&options);
     cl_device_id device_ids;
     cl_int err;
 
-    // "2" here refers to AMD GPUs only
+    // "3" here refers to Intel iGPUs only
 
-    retval = boinc_get_opencl_ids(argc, argv, 2, &device_ids, &platform_id);
+    retval = boinc_get_opencl_ids(argc, argv, 3, &device_ids, &platform_id);
         if (retval) {
             fprintf(stderr, "Error: boinc_get_opencl_ids() failed with error %d\n", retval);
             return 1;
