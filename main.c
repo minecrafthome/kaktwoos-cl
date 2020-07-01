@@ -24,25 +24,25 @@
 #else
 #ifdef _WIN32
 #include "boinc_win.h"
-#endif 
+#endif
 #endif
 
 #include "boinc_api.h"
+#include "boinc_opencl.h"
 
 #define KERNEL_BUFFER_SIZE (0x4000)
 #define MAX_SEED_BUFFER_SIZE (0x10000)
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char * argv[]){
 BOINC_OPTIONS options;
 
 boinc_options_defaults(options);
-options.normal_thread_priority = true; 
+options.normal_thread_priority = true;
 boinc_init_options(&options);
 
     //boinc_init();
 
-    int gpuIndex = 0;
+    int gpuIndex = 0;  // Won't do anything for now
     cl_ulong start = 0;
     cl_ulong end = 0;
     cl_ulong chunkSeed = 0;
@@ -53,6 +53,7 @@ boinc_init_options(&options);
     int neighbor3 = 0;
     int diagonalIndex = 0;
     int cactusHeight = 0;
+    int retval = 0;
 
     char *strend;
     size_t seedbuffer_size;
@@ -61,7 +62,7 @@ boinc_init_options(&options);
         cl_ulong offset;
         cl_ulong start;
         int block;
-	    double elapsed_chkpoint;
+	double elapsed_chkpoint;
         int total_seed_count;
 	};
 
@@ -119,7 +120,7 @@ boinc_init_options(&options);
     };
 
 	fflush(stderr);
-	
+
     FILE *kernel_file = boinc_fopen("kaktwoos.cl", "r");
     if (!kernel_file) {
         printf("Failed to open kernel");
@@ -131,34 +132,22 @@ boinc_init_options(&options);
 
     fclose(kernel_file);
 
-	APP_INIT_DATA aid;
-	boinc_get_init_data(aid);
-	
-	if (aid.gpu_device_num >= 0) {
-	 gpuIndex = aid.gpu_device_num;
-	 fprintf(stderr,"boinc gpu %i gpuindex: %i \n", aid.gpu_device_num, gpuIndex);
-	} 
-	else
-	{
-	fprintf(stderr,"stdalone gpuindex % \n", gpuIndex);
-	}
-	
     cl_platform_id platform_id = NULL;
-    cl_device_id *device_ids;
-    cl_uint num_devices;
-    cl_uint num_platforms;
+    cl_device_id device_ids;
     cl_int err;
 
-    check(clGetPlatformIDs(1, &platform_id, &num_platforms), "clGetPlatformIDs ");
-    check(clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, 0, NULL, &num_devices), "clGetDeviceIDs ");
+    retval = boinc_get_opencl_ids(argc, argv, 1, &device_ids, &platform_id);
+        if (retval) {
+            fprintf(stderr, "Error: boinc_get_opencl_ids() failed with error %d\n", retval);
+            return 1;
+        }
 
-	device_ids = (_cl_device_id**)malloc(num_devices * sizeof(*device_ids));
-    check(clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, num_devices, device_ids, &num_devices), "clGetDeviceIDs ");
+    cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
 
-        cl_context context = clCreateContext(NULL, 1, device_ids + gpuIndex, NULL, NULL, &err);
+    cl_context context = clCreateContext(cps, 1, &device_ids, NULL, NULL, &err);
     check(err, "clCreateContext ");
 
-        cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_ids[gpuIndex], NULL, &err);
+         cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_ids, 0, &err);
     check(err, "clCreateCommandQueueWithProperties ");
 
     seedbuffer_size = 0x40 * sizeof(cl_ulong);
@@ -176,14 +165,14 @@ boinc_init_options(&options);
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    err = clBuildProgram(program, 1, device_ids + gpuIndex, NULL, NULL, NULL);
+    err = clBuildProgram(program, 1, &device_ids, NULL, NULL, NULL);
 
     if (err != CL_SUCCESS) {
         size_t len;
-        clGetProgramBuildInfo(program, device_ids[gpuIndex], CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+        clGetProgramBuildInfo(program, device_ids, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
 
         char *info = (char *)malloc(len);
-        clGetProgramBuildInfo(program, device_ids[gpuIndex], CL_PROGRAM_BUILD_LOG, len, info, NULL);
+        clGetProgramBuildInfo(program, device_ids, CL_PROGRAM_BUILD_LOG, len, info, NULL);
         printf("%s\n", info);
         free(info);
     }
@@ -216,8 +205,8 @@ boinc_init_options(&options);
      fprintf(stderr,"No checkpoint to load\n");
      }
      else {
-		 
-	    void boinc_begin_critical_section();
+
+	void boinc_begin_critical_section();
         struct checkpoint_vars data_store;
 
 	fread(&data_store, sizeof(data_store), 1, checkpoint_data);
@@ -228,7 +217,7 @@ boinc_init_options(&options);
         total_seed_count = data_store.total_seed_count;
 
         fread(found_seeds, sizeof(cl_ulong), total_seed_count, checkpoint_data);
-	
+
         fprintf(stderr,"Checkpoint loaded, task time %d s \n", elapsed_chkpoint);
 	fclose(checkpoint_data);
 	void boinc_end_critical_section();
