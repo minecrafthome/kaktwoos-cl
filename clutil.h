@@ -28,14 +28,14 @@ typedef struct _device_info {
 } device_info;
 
 device_info *getDeviceInfo(cl_device_id id) {
-  device_info *dev_info = malloc(sizeof(device_info));
+  device_info *dev_info = (device_info *)malloc(sizeof(device_info));
   clGetDeviceInfo(id, CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_info->type, NULL);
   clGetDeviceInfo(id, CL_DEVICE_VENDOR, CLUTIL_NAME_LEN, &dev_info->vendor, NULL);
   clGetDeviceInfo(id, CL_DEVICE_NAME, CLUTIL_NAME_LEN, &dev_info->name, NULL);
   clGetDeviceInfo(id, CL_DEVICE_VERSION, CLUTIL_NAME_LEN, &dev_info->version, NULL);
   clGetDeviceInfo(id, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), &dev_info->compute_units, NULL);
   size_t len = (CLUTIL_NAME_LEN + 1) * 3 + 20;
-  dev_info->info_str = malloc(len);
+  dev_info->info_str = (char *)malloc(len);
   snprintf(dev_info->info_str, len, "%s %s %s %s, %u CUs",
     getDeviceTypeString(dev_info->type),
     dev_info->vendor,
@@ -58,7 +58,7 @@ char *getPlatformInfo(cl_platform_id id) {
   char extensions[CLUTIL_NAME_LEN];
   clGetPlatformInfo(id, CL_PLATFORM_EXTENSIONS, CLUTIL_NAME_LEN, extensions, NULL);
   size_t len = (CLUTIL_NAME_LEN + 1) * 5 + 20;
-  char *info = malloc(len);
+  char *info = (char *)malloc(len);
   snprintf(info, len, "%s %s %s %s %s", vendor, name, version, profile, extensions);
   return info;
 }
