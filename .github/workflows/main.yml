@@ -17,29 +17,28 @@ jobs:
     - name: build
       run: |
        echo "##[add-path]D:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\;D:\a\kaktwoos-cl\kaktwoos-cl\include\"
-       gcc -m64 -Ofast -std=c11 .\main.c -o kaktwoos-ocl.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -lOpenCL -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -static -m64 -Ofast -lstdc++ .\main.c -o kaktwoos-ocl.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -static -m64 -Ofast -lstdc++ .\main-amd.c -o kaktwoos-ocl-amd.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
        dir
        
     - uses: actions/upload-artifact@v2
       with:
        name: kaktwoos-ocl-win
-       path: .\kaktwoos-ocl.exe
-
+       path: .\kakt*.exe
 
   linux_opencl:
     name: opencl/release/linux
     runs-on: [ubuntu-latest]
-    container: nvidia/opencl:devel-ubuntu18.04
+    container: nvidia/opencl:devel-ubuntu16.04
     steps:
     - uses: actions/checkout@v2
     - name: build
       run: |
        apt-get update && apt-get install -y \
-       ocl-icd-opencl-dev gcc && \
+       ocl-icd-opencl-dev g++ libboinc7 && \
        rm -rf /var/lib/apt/lists/*
-
-       gcc -Ofast -std=c11 main.c -o kaktwoos-ocl -lOpenCL -DWANTED_CACTUS_HEIGHT=21
-        ls -la
+       g++ -static -w -m64 -O3 -lstdc++ ./main.c -o kaktwoos-ocl -Iboinc/ -Lboinc/lib/lin -lboinc_api -lboinc -lboinc_opencl -Wl,-Bdynamic -lpthread -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
+       ls -la
     - uses: actions/upload-artifact@v2
       with:
        name: kaktwoos-ocl-lin
