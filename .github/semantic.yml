@@ -3,8 +3,10 @@
 
 # List valid scopes, one per component
 scopes:
-  - scope1
-  - scope2
+  - boinc
+  - ci
+  - cli
+  - docs
 
 ###
 # Do not modify values below this line!
