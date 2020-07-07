@@ -14,9 +14,10 @@ kernel void crack(global int *data, global ulong* answer)
     ulong seed = originalSeed;
 
     short position = -1;
-    short currentHighestPos = 0, posMap;
+    short posMap;
     short posX, posY, posZ;
     short initialPosX, initialPosY, initialPosZ, initialPos;
+	short top = data[7];
 
     uint heightMap[205];
 
@@ -25,7 +26,7 @@ kernel void crack(global int *data, global ulong* answer)
     }
 
     for (short i = 0; i < 10; i++) {
-        if (WANTED_CACTUS_HEIGHT - extract(heightMap, currentHighestPos) > 9 * (10 - i)) {
+        if (WANTED_CACTUS_HEIGHT - top > 9 * (10 - i)) {
             return;
         }
 
@@ -33,34 +34,20 @@ kernel void crack(global int *data, global ulong* answer)
         initialPosZ = next(&seed, 4) + 8;
         initialPos = initialPosX + initialPosZ * 32;
 
-        if (position == -1) {
-            if (initialPos == data[3]) {
-                position = 0;
-            } else if (initialPos == data[4]) {
-                position = 1;
-            } else if (initialPos == data[5]) {
-                position = 2;
-            }
-
-            if (position != -1) {
-                int bit = (int)((originalSeed >> 4) & 1);
-
-                if (data[6] != position) {
-                    if (bit == data[9]) return;
-                } else {
-                    if (bit != data[9]) return;
-                }
-
-                increase(heightMap, initialPos, data[7]);
-
-                if (extract(heightMap, currentHighestPos) < extract(heightMap, initialPos)) {
-                    currentHighestPos = initialPos;
-                }
-            }
-        }
-
         short terrainHeight = (extract(heightMap, initialPos) + FLOOR_LEVEL + 1) * 2;
         initialPosY = nextIntUnknown(&seed, terrainHeight);
+
+        if (initialPosY + 3 <= FLOOR_LEVEL && initialPosY - 3 >= 0) {
+            seed = (seed * 256682821044977UL + 233843537749372UL) & ((1UL << 48) - 1);
+            continue;
+        }
+		if (initialPosY - 3 > top + FLOOR_LEVEL + 1) {
+			for (int j = 0; j < 10; j++) {
+				seed = (seed * 76790647859193UL + 25707281917278UL) & ((1UL << 48) - 1);
+				nextIntUnknown(&seed, nextInt(&seed, 3) + 1);
+			}
+			continue;
+		}
 
         for (short a = 0; a < 10; a++) {
             posX = initialPosX + next(&seed, 3) - next(&seed, 3);
@@ -68,7 +55,7 @@ kernel void crack(global int *data, global ulong* answer)
             posZ = initialPosZ + next(&seed, 3) - next(&seed, 3);
             posMap = posX + posZ * 32;
 
-            if (position == -1) {
+            if (position == -1 && posY > FLOOR_LEVEL && posY <= FLOOR_LEVEL + data[7] + 1) {
                 if (posMap == data[3]) {
                     position = 0;
                 } else if (posMap == data[4]) {
@@ -87,10 +74,7 @@ kernel void crack(global int *data, global ulong* answer)
                     }
 
                     increase(heightMap, posMap, data[7]);
-
-                    if (extract(heightMap, currentHighestPos) < extract(heightMap, posMap)) {
-                        currentHighestPos = posMap;
-                   }
+					top = data[7];
                 }
             }
 
@@ -107,16 +91,16 @@ kernel void crack(global int *data, global ulong* answer)
 
                 increase(heightMap, posMap, 1);
 
-                if (extract(heightMap, currentHighestPos) < extract(heightMap, posMap)) {
-                    currentHighestPos = posMap;
+                if (top < extract(heightMap, posMap)) {
+                    top = extract(heightMap, posMap);
                 }
             }
         }
 
     }
-    if (extract(heightMap, currentHighestPos) >= WANTED_CACTUS_HEIGHT) {
+    if (top >= WANTED_CACTUS_HEIGHT) {
         answer[atomic_add(&data[2], 1)] =
-        		((ulong)extract(heightMap, currentHighestPos)) << 58UL |
+        		((ulong)top) << 58UL |
         		(((ulong)data[position + 3]) << 48UL) |
         		originalSeed;
     }
