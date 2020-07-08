@@ -40,6 +40,8 @@ boinc_options_defaults(options);
 options.normal_thread_priority = true;
 boinc_init_options(&options);
 
+boinc_set_min_checkpoint_period(30);
+
     //boinc_init();
 
     int gpuIndex = 0;  // Won't do anything for now
@@ -257,9 +259,7 @@ boinc_init_options(&options);
         block++;
         chkpoint_ready++;
 
-	boinc_time_to_checkpoint();
-
-        if (chkpoint_ready >= 500 || boinc_time_to_checkpoint() ){  // 500 for 0.5bil seeds before checkpoint
+        if (chkpoint_ready >= 200 || boinc_time_to_checkpoint() ){  // 200 for 0.2bil seeds before checkpoint
 
            boinc_begin_critical_section(); // Boinc should not interrupt this
 
@@ -268,9 +268,9 @@ boinc_init_options(&options);
 
             struct checkpoint_vars data_store;
             data_store.offset = offset;
-			data_store.start = start;
+            data_store.start = start;
             data_store.block = block;
-			data_store.elapsed_chkpoint = (elapsed_chkpoint + (double)(end_time - start_time) / CLOCKS_PER_SEC);
+            data_store.elapsed_chkpoint = (elapsed_chkpoint + (double)(end_time - start_time) / CLOCKS_PER_SEC);
             data_store.total_seed_count = total_seed_count;
 
             fwrite(&data_store, sizeof(data_store), 1, checkpoint_data);
