@@ -37,11 +37,11 @@ jobs:
     - name: build
       run: |
        apt-get update && apt-get install -y \
-       ocl-icd-opencl-dev g++ libboinc7 && \
+       ocl-icd-opencl-dev g++ libc6-dev && \
        rm -rf /var/lib/apt/lists/*
-       g++ -static -w -m64 -O3 -lstdc++ ./main.c -o kaktwoos-ocl -Iboinc/ -Lboinc/lib/lin -lboinc_api -lboinc -lboinc_opencl -Wl,-Bdynamic -lpthread -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
-       g++ -static -w -m64 -O3 -lstdc++ ./main-amd.c -o kaktwoos-ocl-amd -Iboinc/ -Lboinc/lib/lin -lboinc_api -lboinc -lboinc_opencl -Wl,-Bdynamic -lpthread -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
-       g++ -static -w -m64 -O3 -lstdc++ ./main-intel.c -o kaktwoos-ocl-intel -Iboinc/ -Lboinc/lib/lin -lboinc_api -lboinc -lboinc_opencl -Wl,-Bdynamic -lpthread -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -m64 -O3 ./main.c -o kaktwoos-ocl-nvidia -Iboinc/ -Lboinc/lib/lin -static-libgcc -static-libstdc++ -lboinc_api -lboinc -lboinc_opencl -pthread -Wl,-Bdynamic -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -m64 -O3 ./main-amd.c -o kaktwoos-ocl-amd -Iboinc/ -Lboinc/lib/lin -static-libgcc -static-libstdc++ -lboinc_api -lboinc -lboinc_opencl -pthread -Wl,-Bdynamic -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -m64 -O3 ./main-intel.c -o kaktwoos-ocl-intel -Iboinc/ -Lboinc/lib/lin -static-libgcc -static-libstdc++ -lboinc_api -lboinc -lboinc_opencl -pthread -Wl,-Bdynamic -lOpenCL -Wl,-dynamic-linker,/lib64/ld-linux-x86-64.so.2 -DWANTED_CACTUS_HEIGHT=21
 
        ls -la
     - uses: actions/upload-artifact@v2
