@@ -119,7 +119,7 @@ boinc_init_options(&options);
         chunkSeedBit5
     };
 
-	fflush(stderr);
+    fflush(stderr);
 
     FILE *kernel_file = boinc_fopen("kaktwoos.cl", "r");
     if (!kernel_file) {
@@ -136,8 +136,7 @@ boinc_init_options(&options);
     cl_device_id device_ids;
     cl_int err;
 
-    // "3" here refers to Intel iGPUs only
-
+    // Third arg is 3 for Intel gpu
     retval = boinc_get_opencl_ids(argc, argv, 3, &device_ids, &platform_id);
         if (retval) {
             fprintf(stderr, "Error: boinc_get_opencl_ids() failed with error %d\n", retval);
@@ -149,7 +148,7 @@ boinc_init_options(&options);
     cl_context context = clCreateContext(cps, 1, &device_ids, NULL, NULL, &err);
     check(err, "clCreateContext ");
 
-         cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_ids, 0, &err);
+    cl_command_queue command_queue = clCreateCommandQueueWithProperties(context, device_ids, 0, &err);
     check(err, "clCreateCommandQueueWithProperties ");
 
     seedbuffer_size = 0x40 * sizeof(cl_ulong);
@@ -204,11 +203,11 @@ boinc_init_options(&options);
     FILE *checkpoint_data = boinc_fopen("kaktpoint.txt", "rb");
 
     if (!checkpoint_data) {
-     fprintf(stderr,"No checkpoint to load\n");
+        fprintf(stderr,"No checkpoint to load\n");
      }
      else {
 
-	    void boinc_begin_critical_section();
+	boinc_begin_critical_section();
         struct checkpoint_vars data_store;
 
 	fread(&data_store, sizeof(data_store), 1, checkpoint_data);
@@ -219,10 +218,10 @@ boinc_init_options(&options);
         total_seed_count = data_store.total_seed_count;
 
         fread(found_seeds, sizeof(cl_ulong), total_seed_count, checkpoint_data);
-	
+
         fprintf(stderr,"Checkpoint loaded, task time %d s \n", elapsed_chkpoint);
 	fclose(checkpoint_data);
-	void boinc_end_critical_section();
+	boinc_end_critical_section();
     }
 
     while (offset < end) {
@@ -258,10 +257,11 @@ boinc_init_options(&options);
         block++;
         chkpoint_ready++;
 
-	    int boinc_time_to_checkpoint();
-        if (chkpoint_ready >= 500 || boinc_time_to_checkpoint() ){  // 500 for 0.5bil seeds before checkpoint
+        boinc_time_to_checkpoint();
 
-           void boinc_begin_critical_section(); // Boinc should not interrupt this
+           if (chkpoint_ready >= 500 || boinc_time_to_checkpoint() ){  // 500 for 0.5bil seeds before checkpoint
+
+           boinc_begin_critical_section(); // Boinc should not interrupt this
 
            boinc_delete_file("kaktpoint.txt");
            FILE *checkpoint_data = boinc_fopen("kaktpoint.txt", "wb");
@@ -282,7 +282,7 @@ boinc_init_options(&options);
             double fraction_done = ((offset - start) / (seedrange));
             boinc_fraction_done(fraction_done);
 
-	    void boinc_end_critical_section();
+	    boinc_end_critical_section();
 	    boinc_checkpoint_completed(); // Checkpointing completed
          }
 
@@ -291,7 +291,7 @@ boinc_init_options(&options);
 
     } // End of seed feed and processing loop
 
-    void boinc_begin_critical_section();
+    boinc_begin_critical_section();
 
     double elapsed = (double)(end_time - start_time) / CLOCKS_PER_SEC;
     fprintf(stderr,"Speed: %.2fm/s \n", (offset - start) / (elapsed_chkpoint + elapsed) / 1000000);
@@ -303,7 +303,7 @@ boinc_init_options(&options);
 
     fprintf(stderr,"Found seeds: \n");
 
-   for (int i = 0; i < total_seed_count; i++) {
+    for (int i = 0; i < total_seed_count; i++) {
         fprintf(stderr,"    %"SCNd64 "\n", found_seeds[i]);
     }
 
@@ -318,7 +318,7 @@ boinc_init_options(&options);
     check(clReleaseContext(context), "clReleaseContext ");
 
     fflush(stderr);
-    void boinc_end_critical_section();
+    boinc_end_critical_section();
     boinc_finish(0);
 
 }
