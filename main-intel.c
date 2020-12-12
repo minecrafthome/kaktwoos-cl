@@ -187,7 +187,7 @@ boinc_set_min_checkpoint_period(30);
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    err = clBuildProgram(program, 1, &device_ids, "-D FLOOR_LEVEL " + floor_level, NULL, NULL);
+    err = clBuildProgram(program, 1, &device_ids, "-D FLOOR_LEVEL=" + floor_level, NULL, NULL);
 
     if (err != CL_SUCCESS) {
         size_t len;
