@@ -137,7 +137,10 @@ boinc_set_min_checkpoint_period(30);
     cl_platform_id platform_id = NULL;
     cl_device_id device_ids;
     cl_int err;
-
+    cl_uint num_devices_standalone;
+    num_devices_standalone = 1;
+    cl_uint num_entries;
+    num_entries = 1;
     // Third arg is 1 for Nvidia
     #ifdef BOINC
     retval = boinc_get_opencl_ids(argc, argv, 1, &device_ids, &platform_id);
