@@ -8,15 +8,14 @@ jobs:
     runs-on: [windows-latest]
     steps:
     - uses: actions/checkout@v2
-    - uses: msys2/setup-msys2@v1
+    - uses: msys2/setup-msys2@v2
     - name: setup
       run: |
-       msys2 wget https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/files/1406216/lightOCLSDK.zip -O amdocl.zip
+       msys2 -c 'wget https://github.com/GPUOpen-LibrariesAndSDKs/OCL-SDK/files/1406216/lightOCLSDK.zip -O amdocl.zip'
        jar xf amdocl.zip 
-       
     - name: build
       run: |
-       echo "##[add-path]D:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\;D:\a\kaktwoos-cl\kaktwoos-cl\include\"
+       echo "D:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\;D:\a\kaktwoos-cl\kaktwoos-cl\include\" >> $GITHUB_PATH
        g++ -w -static -m64 -Ofast -lstdc++ .\main.c -o kaktwoos-ocl.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
        g++ -w -static -m64 -Ofast -lstdc++ .\main-amd.c -o kaktwoos-ocl-amd.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
        g++ -w -static -m64 -Ofast -lstdc++ .\main-intel.c -o kaktwoos-ocl-intel.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21

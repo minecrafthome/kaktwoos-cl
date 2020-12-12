@@ -56,6 +56,7 @@ boinc_set_min_checkpoint_period(30);
     int diagonalIndex = 0;
     int cactusHeight = 0;
     int retval = 0;
+    int floor_level = 63;
 
     char *strend;
     size_t seedbuffer_size;
@@ -95,18 +96,21 @@ boinc_set_min_checkpoint_period(30);
             diagonalIndex = atoi(argv[i + 1]);
         } else if (strcmp(param, "-ch") == 0 || strcmp(param, "--cactusheight") == 0) {
             cactusHeight = atoi(argv[i + 1]);
+        } else if (strcmp(param, "-f") == 0 || strcmp(param, "--floorlevel") == 0){
+            floor_level = atoi(argv[i + 1]);
         } else {
             printf("Unknown parameter: %s\n", param);
         }
     }
 
     fprintf(stderr,"Received work unit: %" SCNd64 "\n", chunkSeed);
-    fprintf(stderr,"Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d\n",
+    fprintf(stderr,"Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d, f: %d\n",
         neighbor1,
         neighbor2,
         neighbor3,
         diagonalIndex,
-        cactusHeight);
+        cactusHeight,
+        floor_level);
 
     int arguments[10] = {
         0,
@@ -137,12 +141,25 @@ boinc_set_min_checkpoint_period(30);
     cl_platform_id platform_id = NULL;
     cl_device_id device_ids;
     cl_int err;
-
+    cl_uint num_devices_standalone;
+    num_devices_standalone = 1;
+    cl_uint num_entries;
+    num_entries = 1;
     // Third arg has 2 for AMD
     retval = boinc_get_opencl_ids(argc, argv, 2, &device_ids, &platform_id);
         if (retval) {
+            //Probably standalone mode
             fprintf(stderr, "Error: boinc_get_opencl_ids() failed with error %d\n", retval);
-            return 1;
+            retval = clGetPlatformIDs(num_entries, &platform_id, &num_devices_standalone);
+            if (retval) {
+                fprintf(stderr, "Error: clGetPlatformIDs() failed with error %d\n", retval);
+                return 1;
+            }
+            retval = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, num_entries, &device_ids, &num_devices_standalone);
+            if (retval) {
+                fprintf(stderr, "Error: clGetDeviceIDs() failed with error %d\n", retval);
+                return 1;
+            }
         }
 
     cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
@@ -168,7 +185,9 @@ boinc_set_min_checkpoint_period(30);
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    err = clBuildProgram(program, 1, &device_ids, NULL, NULL, NULL);
+    char* opt = (char*)malloc(20*sizeof(char));
+    sprintf(opt, "-DFLOOR_LEVEL=%d", floor_level);
+    err = clBuildProgram(program, 1, &device_ids, opt, NULL, NULL);
 
     if (err != CL_SUCCESS) {
         size_t len;
