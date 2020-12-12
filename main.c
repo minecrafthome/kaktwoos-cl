@@ -139,12 +139,24 @@ boinc_set_min_checkpoint_period(30);
     cl_int err;
 
     // Third arg is 1 for Nvidia
+    #ifdef BOINC
     retval = boinc_get_opencl_ids(argc, argv, 1, &device_ids, &platform_id);
         if (retval) {
             fprintf(stderr, "Error: boinc_get_opencl_ids() failed with error %d\n", retval);
             return 1;
         }
-
+    #else
+    retval = clGetPlatformIDs(num_entries, &platform_id, &num_devices_standalone);
+        if (retval) {
+            fprintf(stderr, "Error: clGetPlatformIDs() failed with error %d\n", retval);
+            return 1;
+        }
+    retval = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_GPU, num_entries, &device_ids, &num_devices_standalone);
+        if (retval) {
+            fprintf(stderr, "Error: clGetDeviceIDs() failed with error %d\n", retval);
+            return 1;
+        }
+    #endif
     cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
 
     cl_context context = clCreateContext(cps, 1, &device_ids, NULL, NULL, &err);
