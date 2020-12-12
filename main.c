@@ -123,7 +123,6 @@ boinc_set_min_checkpoint_period(30);
         cactusHeight,
         chunkSeedBottom4Bits,
         chunkSeedBit5,
-        floor_level
     };
 
 	fflush(stderr);
@@ -178,7 +177,7 @@ boinc_set_min_checkpoint_period(30);
     // 16 Kb of memory for seeds
     cl_mem seeds = clCreateBuffer(context, CL_MEM_READ_WRITE, seedbuffer_size , NULL, &err);
     check(err, "clCreateBuffer (seeds) ");
-    cl_mem data =  clCreateBuffer(context, CL_MEM_READ_ONLY, 11 * sizeof(int), NULL, &err);
+    cl_mem data =  clCreateBuffer(context, CL_MEM_READ_ONLY, 10 * sizeof(int), NULL, &err);
     check(err, "clCreateBuffer (data) ");
 
     cl_program program = clCreateProgramWithSource(
@@ -188,7 +187,7 @@ boinc_set_min_checkpoint_period(30);
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    err = clBuildProgram(program, 1, &device_ids, NULL, NULL, NULL);
+    err = clBuildProgram(program, 1, &device_ids, "-D FLOOR_LEVEL " + itoa(floor_level), NULL, NULL);
 
     if (err != CL_SUCCESS) {
         size_t len;
@@ -250,11 +249,11 @@ boinc_set_min_checkpoint_period(30);
 
         arguments[0] =  block + start / work_unit_size;
 
-        check(clEnqueueWriteBuffer(command_queue, data, CL_TRUE, 0, 11 * sizeof(int), arguments, 0, NULL, NULL), "clEnqueueWriteBuffer ");
+        check(clEnqueueWriteBuffer(command_queue, data, CL_TRUE, 0, 10 * sizeof(int), arguments, 0, NULL, NULL), "clEnqueueWriteBuffer ");
         check(clEnqueueNDRangeKernel(command_queue, kernel, 1, NULL, &work_unit_size, &block_size, 0, NULL, NULL), "clEnqueueNDRangeKernel ");
 
-        int *data_out = (int *)malloc(sizeof(int) * 11);
-        check(clEnqueueReadBuffer(command_queue, data, CL_TRUE, 0, sizeof(int) * 11, data_out, 0, NULL, NULL), "clEnqueueReadBuffer (data) ");
+        int *data_out = (int *)malloc(sizeof(int) * 10);
+        check(clEnqueueReadBuffer(command_queue, data, CL_TRUE, 0, sizeof(int) * 10, data_out, 0, NULL, NULL), "clEnqueueReadBuffer (data) ");
 
         int seed_count = data_out[2];
         seedbuffer_size = sizeof(cl_ulong) + sizeof(cl_ulong) * seed_count;
