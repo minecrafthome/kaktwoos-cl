@@ -189,6 +189,7 @@ boinc_set_min_checkpoint_period(30);
     check(err, "clCreateProgramWithSource ");
     char* opt = (char*)malloc(20*sizeof(char));
     sprintf(opt, "-DFlOOR_LEVEL=%d", floor_level);
+    printf("Test: %s if there's nothing before this then fucking hell", opt);
     err = clBuildProgram(program, 1, &device_ids, opt, NULL, NULL);
 
     if (err != CL_SUCCESS) {
