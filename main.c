@@ -187,7 +187,7 @@ boinc_set_min_checkpoint_period(30);
             &kernel_length,
             &err);
     check(err, "clCreateProgramWithSource ");
-    char* opt = (char*)malloc();
+    char* opt = (char*)malloc(20);
     sprintf(opt, "-DFlOOR_LEVEL=%d", floor_level);
     err = clBuildProgram(program, 1, &device_ids, opt, NULL, NULL);
 
