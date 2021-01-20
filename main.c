@@ -96,7 +96,7 @@ boinc_set_min_checkpoint_period(30);
             diagonalIndex = atoi(argv[i + 1]);
         } else if (strcmp(param, "-ch") == 0 || strcmp(param, "--cactusheight") == 0) {
             cactusHeight = atoi(argv[i + 1]);
-        } else if (strcmp(param, "-fl") == 0 || strcmp(param, "--floorlevel") == 0){
+        } else if (strcmp(param, "-f") == 0 || strcmp(param, "--floorlevel") == 0){
             floor_level = atoi(argv[i + 1]);
         } else {
             printf("Unknown parameter: %s\n", param);
@@ -104,7 +104,7 @@ boinc_set_min_checkpoint_period(30);
     }
 
     fprintf(stderr,"Received work unit: %" SCNd64 "\n", chunkSeed);
-    fprintf(stderr,"Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d, floor_level: %d\n",
+    fprintf(stderr,"Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d, f: %d\n",
         neighbor1,
         neighbor2,
         neighbor3,
