@@ -2,7 +2,7 @@ int nextInt(ulong* seed, short bound);
 int next(ulong* seed, short bits);
 int nextIntUnknown(ulong* seed, short bound);
 
-#define WANTED_CACTUS_HEIGHT 18
+#define WANTED_CACTUS_HEIGHT 22
 kernel void crack(global int *data, global ulong* answer)
 {
     int id = get_global_id(0);
