@@ -127,9 +127,9 @@ boinc_set_min_checkpoint_period(30);
 
 	fflush(stderr);
 
-    FILE *kernel_file = boinc_fopen("kaktwoos.cl", "r");
+    FILE *kernel_file = boinc_fopen("kaktwoos-nv.cl", "r");
     if (!kernel_file) {
-        printf("Failed to open kernel");
+        fprintf(stderr,"Failed to open kernel");
         exit(1);
     }
 
@@ -162,7 +162,7 @@ boinc_set_min_checkpoint_period(30);
                 return 1;
             }
         }
-    
+
     cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
 
     cl_context context = clCreateContext(cps, 1, &device_ids, NULL, NULL, &err);
