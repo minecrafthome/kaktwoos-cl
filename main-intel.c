@@ -129,7 +129,7 @@ boinc_set_min_checkpoint_period(30);
 
     FILE *kernel_file = boinc_fopen("kaktwoos.cl", "r");
     if (!kernel_file) {
-        printf("Failed to open kernel");
+        fprintf(stderr,"Failed to open kernel");
         exit(1);
     }
 

@@ -127,17 +127,6 @@ boinc_set_min_checkpoint_period(30);
 
 	fflush(stderr);
 
-    FILE *kernel_file = boinc_fopen("kaktwoos.cl", "r");
-    if (!kernel_file) {
-        printf("Failed to open kernel");
-        exit(1);
-    }
-
-    char *kernel_src = (char *)malloc(KERNEL_BUFFER_SIZE);
-    size_t kernel_length = fread(kernel_src, 1, KERNEL_BUFFER_SIZE, kernel_file);
-
-    fclose(kernel_file);
-
     cl_platform_id platform_id = NULL;
     cl_device_id device_ids;
     cl_int err;
@@ -145,6 +134,8 @@ boinc_set_min_checkpoint_period(30);
     num_devices_standalone = 1;
     cl_uint num_entries;
     num_entries = 1;
+    const char* kernel_name = "kaktwoos-amd.cl";
+
     // Third arg has 2 for AMD
     retval = boinc_get_opencl_ids(argc, argv, 2, &device_ids, &platform_id);
         if (retval) {
@@ -161,6 +152,41 @@ boinc_set_min_checkpoint_period(30);
                 return 1;
             }
         }
+
+    char buffer[1024];
+    char *navi10="gfx1010";
+    char *navi12="gfx1012";
+    char *navi21="gfx1030"; // Yes, RDNA2 is Navi 21, but GFX1030
+
+    clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+    //fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
+
+    if (strcmp(navi10, buffer) == 0 ) {
+        printf("GPU Navi 10, compat time");
+        kernel_name = "kaktwoos.cl";
+        }
+
+    if (strcmp(navi12, buffer) == 0 ) {
+        printf("GPU Navi 12, compat time");
+        kernel_name = "kaktwoos.cl";
+        }
+
+    if (strcmp(navi21, buffer) == 0 ) {
+         printf("GPU Navi 21, compat time");
+         kernel_name = "kaktwoos.cl";
+        }
+
+
+    FILE *kernel_file = boinc_fopen(kernel_name, "r");
+    if (!kernel_file) {
+        fprintf(stderr,"Failed to open kernel");
+        exit(1);
+    }
+
+    char *kernel_src = (char *)malloc(KERNEL_BUFFER_SIZE);
+    size_t kernel_length = fread(kernel_src, 1, KERNEL_BUFFER_SIZE, kernel_file);
+
+    fclose(kernel_file);
 
     cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
 
