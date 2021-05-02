@@ -16,7 +16,7 @@ jobs:
     - name: build
       run: |
        echo "D:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\;D:\a\kaktwoos-cl\kaktwoos-cl\include\" >> $GITHUB_PATH
-       g++ -w -static -m64 -Ofast -lstdc++ .\main-nv.c -o kaktwoos-ocl.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
+       g++ -w -static -m64 -Ofast -lstdc++ .\main-nv.c -o kaktwoos-ocl-nv.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
        g++ -w -static -m64 -Ofast -lstdc++ .\main-amd.c -o kaktwoos-ocl-amd.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
        g++ -w -static -m64 -Ofast -lstdc++ .\main-intel.c -o kaktwoos-ocl-intel.exe -LD:\a\kaktwoos-cl\kaktwoos-cl\lib\x86_64\ -ID:\a\kaktwoos-cl\kaktwoos-cl\include\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\ -ID:\a\kaktwoos-cl\kaktwoos-cl\boinc\win\ -LD:\a\kaktwoos-cl\kaktwoos-cl\boinc\lib\win\ -lboinc_api -lboinc -lboinc_opencl -lOpenCL -D_WIN64 -DWIN64 -D_WIN32 -DWIN32 -DWANTED_CACTUS_HEIGHT=21
 
@@ -47,3 +47,4 @@ jobs:
       with:
        name: kaktwoos-ocl-lin
        path: ./kaktwoos-ocl*
+

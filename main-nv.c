@@ -138,17 +138,6 @@ int main(int argc, char *argv[]) {
 
     fflush(stderr);
 
-    FILE *kernel_file = boinc_fopen("kaktwoos-nv.cl", "r");
-    if (!kernel_file) {
-        fprintf(stderr, "Failed to open kernel");
-        exit(1);
-    }
-
-    char *kernel_src = (char *) malloc(KERNEL_BUFFER_SIZE);
-    size_t kernel_length = fread(kernel_src, 1, KERNEL_BUFFER_SIZE, kernel_file);
-
-    fclose(kernel_file);
-
     cl_platform_id platform_id = NULL;
     cl_device_id device_ids;
     cl_int err;
@@ -156,8 +145,9 @@ int main(int argc, char *argv[]) {
     num_devices_standalone = 1;
     cl_uint num_entries;
     num_entries = 1;
-    // Third arg is 1 for Nvidia
+    const char* kernel_name = "kaktwoos.cl";
 
+    // Third arg is 1 for Nvidia
     retval = boinc_get_opencl_ids(argc, argv, 1, &device_ids, &platform_id);
     if (retval) {
         //Probably standalone mode
@@ -173,6 +163,38 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
+
+    char buffer[1024]; // Buffer to store rec'd GPU chip
+    char *rtx="RTX"; // CASE SENSITIVE?
+    char *gtx16="GTX 16";
+
+    clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
+    fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
+
+    char* tmpBuffer = buffer+8;
+    tmpBuffer[3] = '\0';
+    if (strcmp(rtx, tmpBuffer) == 0 ) {
+        kernel_name = "kaktwoos-nv.cl";
+        fprintf(stderr,"RTX, Optimizations applied!\n");
+    }
+
+    tmpBuffer[3] = ' ';
+    tmpBuffer[6] = '\0';
+    if (strcmp(gtx16, tmpBuffer) == 0 ) {
+        kernel_name = "kaktwoos-nv.cl";
+        fprintf(stderr,"GTX 16XX, Optimizations applied!\n");
+    }
+
+    FILE *kernel_file = boinc_fopen(kernel_name, "r");
+    if (!kernel_file) {
+        fprintf(stderr,"Failed to open kernel\n");
+        exit(1);
+    }
+
+    char *kernel_src = (char *)malloc(KERNEL_BUFFER_SIZE);
+    size_t kernel_length = fread(kernel_src, 1, KERNEL_BUFFER_SIZE, kernel_file);
+
+    fclose(kernel_file);
 
     cl_context_properties cps[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties) platform_id, 0};
 
@@ -245,6 +267,7 @@ int main(int argc, char *argv[]) {
         fread(&data_store, sizeof(data_store), 1, checkpoint_data);
         offset = data_store.offset;
         start = data_store.start;
+	end = data_store.end;
         block = data_store.block;
         elapsed_chkpoint = data_store.elapsed_chkpoint;
         total_seed_count = data_store.total_seed_count;

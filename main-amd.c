@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
     num_devices_standalone = 1;
     cl_uint num_entries;
     num_entries = 1;
-    const char *kernel_name = "kaktwoos-amd.cl";
+    const char *kernel_name = "kaktwoos-amd.cl"; // default kernel
 
     // Third arg has 2 for AMD
     retval = boinc_get_opencl_ids(argc, argv, 2, &device_ids, &platform_id);
@@ -165,28 +165,16 @@ int main(int argc, char *argv[]) {
     }
 
     char buffer[1024];
-    char *navi10 = "gfx1010";
-    char *navi12 = "gfx1012";
-    char *navi21 = "gfx1030"; // Yes, RDNA2 is Navi 21, but GFX1030
+    char *navi = "gfx10";
 
     clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
     //fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
 
-    if (strcmp(navi10, buffer) == 0) {
-        printf("GPU Navi 10, compat time");
+    buffer[5] = '\0';
+    if (strcmp(navi, buffer) == 0 ) {
         kernel_name = "kaktwoos.cl";
+        fprintf(stderr,"RDNA GPU, optimizations disabled\n");
     }
-
-    if (strcmp(navi12, buffer) == 0) {
-        printf("GPU Navi 12, compat time");
-        kernel_name = "kaktwoos.cl";
-    }
-
-    if (strcmp(navi21, buffer) == 0) {
-        printf("GPU Navi 21, compat time");
-        kernel_name = "kaktwoos.cl";
-    }
-
 
     FILE *kernel_file = boinc_fopen(kernel_name, "r");
     if (!kernel_file) {
@@ -268,8 +256,10 @@ int main(int argc, char *argv[]) {
         struct checkpoint_vars data_store;
 
         fread(&data_store, sizeof(data_store), 1, checkpoint_data);
+
         offset = data_store.offset;
         start = data_store.start;
+        end = data_store.end;
         block = data_store.block;
         elapsed_chkpoint = data_store.elapsed_chkpoint;
         total_seed_count = data_store.total_seed_count;
