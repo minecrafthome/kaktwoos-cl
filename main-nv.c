@@ -167,13 +167,18 @@ int main(int argc, char *argv[]) {
     }
 
     char buffer[1024]; // Buffer to store rec'd GPU chip
-    char *rtx="RTX"; // CASE SENSITIVE?
+    char *rtx="RTX"; // CASE SENSITIVE
     char *gtx16="GTX 16";
 
     clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
     fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
 
-    char* tmpBuffer = buffer+8;
+    if ( 'N' == buffer[0] ){
+    char* tmpBuffer = buffer+15;
+    } else {
+    char* tmpBuffer = buffer+8; // buffer+8 for GeForce name, +15 for Nvidia Geforce
+    }
+
     tmpBuffer[3] = '\0';
     if (strcmp(rtx, tmpBuffer) == 0 ) {
         kernel_name = "kaktwoos-nv.cl";

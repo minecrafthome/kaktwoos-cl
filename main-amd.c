@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     char *navi = "gfx10";
 
     clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
-    //fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
+    fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
 
     buffer[5] = '\0';
     if (strcmp(navi, buffer) == 0 ) {
