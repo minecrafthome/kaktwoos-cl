@@ -172,11 +172,11 @@ int main(int argc, char *argv[]) {
 
     clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
     fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
-
+    char* tmpBuffer;
     if ( 'N' == buffer[0] ){
-    char* tmpBuffer = buffer+15;
+    tmpBuffer = buffer+15;
     } else {
-    char* tmpBuffer = buffer+7; // buffer+7 for GeForce name, +15 for Nvidia Geforce 
+    tmpBuffer = buffer+8; // buffer+8 for GeForce name, +15 for Nvidia Geforce
     }
 
     tmpBuffer[3] = '\0';
