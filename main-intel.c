@@ -115,7 +115,8 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Received work unit: %"
     SCNd64
     "\n", chunkSeed);
-    fprintf(stderr, "Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d, f: %d, s: %SCNd64, e: %SCNd64 \n",
+
+    fprintf(stderr, "Data: n1: %d, n2: %d, n3: %d, di: %d, ch: %d, f: %d, s: %" SCNd64 ", e: %" SCNd64 "\n",
             neighbor1,
             neighbor2,
             neighbor3,
