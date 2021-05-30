@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
         fread(&data_store, sizeof(data_store), 1, checkpoint_data);
         offset = data_store.offset;
         start = data_store.start;
-	end = data_store.end;
+	    end = data_store.end;
         block = data_store.block;
         elapsed_chkpoint = data_store.elapsed_chkpoint;
         total_seed_count = data_store.total_seed_count;
