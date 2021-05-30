@@ -174,11 +174,13 @@ int main(int argc, char *argv[]) {
     clGetDeviceInfo(device_ids, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL);
     fprintf(stderr,"DEVICE_NAME = %s\n", buffer);
 
+
     char* tmpBuffer;
     if ( 'N' == buffer[0] ){
     tmpBuffer = buffer+15;
     } else {
     tmpBuffer = buffer+8; // buffer+8 for GeForce name, +15 for Nvidia Geforce
+
     }
 
     tmpBuffer[3] = '\0';
@@ -187,7 +189,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr,"RTX, Optimizations applied!\n");
     }
 
-    tmpBuffer[3] = ' ';
+    tmpBuffer[3]=' ';
     tmpBuffer[6] = '\0';
     if (strcmp(gtx16, tmpBuffer) == 0 ) {
         kernel_name = "kaktwoos-nv.cl";
@@ -276,7 +278,7 @@ int main(int argc, char *argv[]) {
         fread(&data_store, sizeof(data_store), 1, checkpoint_data);
         offset = data_store.offset;
         start = data_store.start;
-	end = data_store.end;
+	      end = data_store.end;
         block = data_store.block;
         elapsed_chkpoint = data_store.elapsed_chkpoint;
         total_seed_count = data_store.total_seed_count;
