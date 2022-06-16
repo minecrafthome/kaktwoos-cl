@@ -48,3 +48,19 @@ jobs:
        name: kaktwoos-ocl-lin
        path: ./kaktwoos-ocl*
 
+  macOS_opencl:
+    name: opencl/release/macOS
+    runs-on: [macos-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: build
+        run: |
+          clang  -target 'aarch64-apple-darwin' -w -m64 -O3 ./main-apple.c -o kaktwoos-ocl-macos-aarch64 -Iboinc/ -Lboinc/lib/macos -lboinc_api -lboinc -lboinc_opencl -pthread -framework OpenCL -DWANTED_CACTUS_HEIGHT=21
+          clang  -target 'x86_64-apple-darwin' -w -m64 -O3 ./main-apple.c -o kaktwoos-ocl-macos-x86_64 -Iboinc/ -Lboinc/lib/macos -lboinc_api -lboinc -lboinc_opencl -pthread -framework OpenCL -DWANTED_CACTUS_HEIGHT=21
+
+          ls -la
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kaktwoos-ocl-macos
+          path: ./kaktwoos-ocl*
